@@ -24,17 +24,17 @@ def test_tramo_respeta_desde_y_hasta():
 
 
 def test_hasta_cero_no_se_confunde_con_sin_hasta():
-    with pytest.raises(ValueError, match="después"):
+    with pytest.raises(ValueError, match="must come after"):
         calcular_tramo("0:10", "0", 600.0)
 
 
 def test_hasta_antes_que_desde_es_un_error():
-    with pytest.raises(ValueError, match="después"):
+    with pytest.raises(ValueError, match="must come after"):
         calcular_tramo("2:00", "1:00", 600.0)
 
 
 def test_desde_pasado_el_final_es_un_error():
-    with pytest.raises(ValueError, match="dura"):
+    with pytest.raises(ValueError, match="lasts"):
         calcular_tramo("10:00", None, 300.0)
 
 

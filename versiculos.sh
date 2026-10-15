@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
-# Hace todos los shorts de entrada/lote.txt  (./versiculos.sh --solo nombre  para uno)
+# Makes every Short in entrada/lote.txt  (./versiculos.sh --solo name  for just one)
 cd "$(dirname "$0")" && exec python3 scripts/hacer_versiculos.py "$@"

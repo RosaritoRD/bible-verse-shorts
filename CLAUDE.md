@@ -1,55 +1,57 @@
 # shorts-versiculos
 
-## Qué es
-Fábrica en serie de YouTube Shorts verticales para canales cristianos:
-(A) versículo en pantalla sobre un fondo de stock con música de la Biblioteca de
-audio de YouTube; (B) clips para campañas de clipping (pago por vistas) con
-subtítulos y cartel de cita bíblica.
+## What it is
+A batch factory for vertical YouTube Shorts for Spanish-language Christian channels:
+(A) a Bible verse on screen over stock footage with music from the YouTube Audio
+Library; (B) clips for clipping campaigns (paid per view) with subtitles and a
+Bible-reference title card.
 
-## Estado (01/10/2026)
-Pipeline construido y probado con material sintético (`./probar.sh` en verde,
-42 tests). Todavía **sin fondos, música ni canal reales**: `entrada/` está vacía
-a propósito (si se deja material de prueba, el azar lo mete en shorts reales).
-Guía de uso: `COMO-USAR.md`.
+On-screen text, references and upload sheets are **Spanish on purpose** — that's
+the product. Code comments, CLI messages and docs are in English.
 
-## Panel web (01/10/2026)
-También se usa desde **el panel de Oraflow → pestañas Shorts y Clipping** (Oraflow,
-`Oraflow`, `utils/shorts-studio-service.js`). El contenedor
-de Oraflow monta esta carpeta en `/shorts` (SHORTS_DIR) y corre los mismos scripts
-con su Python 3.10 (faster-whisper instalado en la imagen). `entrada/` y `salida/` son
-del uid 1000 (pwuser) para que el contenedor escriba. No dejar material de prueba en
-`entrada/`: el sorteo de fondos/música lo usaría en shorts reales.
+## Status
+The pipeline is built and tested with synthetic material (`./probar.sh` green,
+51 tests). `entrada/` ships empty on purpose: if test material is left there, the
+random picker will put it into real Shorts.
+Usage guide: `HOW-TO-USE.md`.
+
+## Web dashboard (optional)
+It can also be driven from the **Oraflow dashboard → Shorts and Clipping tabs**
+(`utils/shorts-studio-service.js` in Oraflow). The Oraflow container mounts this
+folder at `/shorts` (SHORTS_DIR) and runs the same scripts with its own Python
+(faster-whisper installed in the image). `entrada/` and `salida/` must be writable
+by the container's user (uid 1000).
 
 ## Pipeline
 - `scripts/referencias.py`: "Salmos 3:4" → "Salmos capítulo 3, versículo 4"
-  (formato elegido para que suene natural). Con números manda el orden bíblico (cap:vers); con
-  palabras ("Juan versículo 3 capítulo 5") manda cada palabra. `detectar()` busca
-  citas en lo hablado (Whisper escribe "Juan 3 16", sin dos puntos).
-- `scripts/biblia.py`: RV1909 de eBible.org (dominio público) → `biblia/rv1909.json`.
-  Modernización mínima (á→a, fué→fue, versalitas), quita títulos de salmos,
-  "(Selah.)" y corchetes. No cambia palabras.
-- `scripts/lote.py` (puro, testeado): lote.txt → shorts, tiempos (~2,4 palabras/s,
-  mín. 4 s), subtítulos ASS, ficha de subida (título/descr./hashtags/atribución).
+  (chosen because it sounds natural when read). With numbers the Bible order wins
+  (chapter:verse); with words ("Juan versículo 3 capítulo 5") each word says what
+  it is. `detectar()` finds references in speech (Whisper writes "Juan 3 16",
+  without the colon).
+- `scripts/biblia.py`: RV1909 from eBible.org (public domain) → `biblia/rv1909.json`.
+  Minimal modernization (á→a, fué→fue, small caps), strips psalm titles,
+  "(Selah.)" and brackets. Never changes words.
+- `scripts/lote.py` (pure, tested): lote.txt → Shorts, timing (~2.4 words/s,
+  min 4 s), ASS subtitles, upload sheet (title/description/hashtags/attribution).
 - `scripts/hacer_versiculos.py` / `hacer_clipping.py`: ffmpeg + libass;
-  clipping usa faster-whisper (small, CPU int8) en `.venv`.
-- Instalar en máquina nueva: `python3 -m venv .venv && .venv/bin/pip install -r requirements.txt && python3 scripts/biblia.py preparar`
-- `SHORTS_DIR` cambia la carpeta de trabajo (lo usa `probar.sh`).
+  clipping uses faster-whisper (small, CPU int8) in `.venv`.
+- Install on a new machine: `python3 -m venv .venv && .venv/bin/pip install -r requirements.txt && python3 scripts/biblia.py preparar`
+- `SHORTS_DIR` changes the working folder (used by `probar.sh`).
 
-## Trampas
-- faster-whisper lee el audio con PyAV, que falla en Python 3.14
-  (`metadata_errors`) → se le pasa el audio ya decodificado por ffmpeg (`audio_16k`).
-- Los estilos ASS son f-strings: si falta la `f`, el margen queda como texto
-  literal y libass coloca el texto donde quiere (hay un test que lo vigila).
-- La RV1909 de eBible numera distinto Job 39–41 (39:30 junta varios versículos
-  y Job 40:1 = 40:6 moderno). Documentado en COMO-USAR; no se corrige solo.
-- La zona inferior (~25 %) la tapan el título y los botones de Shorts: la cita
-  va en y=1180 y el versículo crece hacia arriba desde ahí.
+## Gotchas
+- faster-whisper reads audio with PyAV, which fails on Python 3.14
+  (`metadata_errors`) → it gets audio already decoded by ffmpeg (`audio_16k`).
+- The ASS styles are f-strings: drop the `f` and the margin becomes literal text
+  and libass puts the text wherever it likes (a test guards this).
+- eBible's RV1909 numbers Job 39–41 differently (39:30 merges several verses and
+  Job 40:1 = modern 40:6). Documented in HOW-TO-USE; not fixed automatically.
+- The bottom ~25 % is covered by the Shorts title and buttons: the reference sits
+  at y=1180 and the verse grows upward from there.
 
-## Reglas
-- Nada de resubir contenido ajeno sin permiso (strikes que tumban todos los
-  canales relacionados). Clipping solo de campañas con permiso.
-- The Chosen: solo si confirman que lo permiten.
-- Biblias modernas (RVR1960, NVI) tienen copyright → por defecto la 1909.
+## Rules
+- Never re-upload other people's content without permission (strikes can take
+  down every related channel). Clipping only from campaigns that allow it.
+- Modern Bibles (RVR1960, NVI) are copyrighted → the 1909 by default.
 
-## No mezclar
-Este proyecto es independiente: no necesita Oraflow para funcionar.
+## Don't mix
+This project is independent: it doesn't need Oraflow to work.

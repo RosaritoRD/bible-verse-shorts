@@ -1,9 +1,9 @@
-"""Texto de los versículos: Reina-Valera 1909 (dominio público, eBible.org).
+"""Verse text: Reina-Valera 1909 (public domain, eBible.org).
 
-    python3 scripts/biblia.py preparar   # una vez: crea biblia/rv1909.json
+    python3 scripts/biblia.py preparar   # once: creates biblia/rv1909.json
 
-Se moderniza lo mínimo de la ortografía de 1909 ("á Jehová" -> "a Jehová",
-"fué" -> "fue") sin tocar las palabras: sigue siendo el texto de 1909.
+The 1909 spelling is modernized as little as possible ("á Jehová" -> "a Jehová",
+"fué" -> "fue") without touching the words: it is still the 1909 text.
 """
 import json
 import re
@@ -17,7 +17,7 @@ JSON = RAIZ / "biblia" / "rv1909.json"
 VPL = RAIZ / "biblia" / "spaRV1909_vpl.txt"
 FUENTE = "https://ebible.org/Scriptures/spaRV1909_vpl.zip"
 
-# Códigos de eBible en el orden de LIBROS (sin "Salmo", que es alias).
+# eBible codes in the order of LIBROS (without "Salmo", which is an alias).
 CODIGOS = ("GEN EXO LEV NUM DEU JOS JDG RUT 1SA 2SA 1KI 2KI 1CH 2CH EZR NEH "
            "EST JOB PSA PRO ECC SOL ISA JER LAM EZE DAN HOS JOE AMO OBA JON "
            "MIC NAH HAB ZEP HAG ZEC MAL MAT MAR LUK JOH ACT ROM 1CO 2CO GAL "
@@ -26,8 +26,8 @@ CODIGOS = ("GEN EXO LEV NUM DEU JOS JDG RUT 1SA 2SA 1KI 2KI 1CH 2CH EZR NEH "
 _NOMBRES = [l for l in LIBROS if l != "Salmo"]
 assert len(CODIGOS) == len(_NOMBRES) == 66
 
-# En 1909 se acentuaban las conjunciones y preposiciones sueltas y algunos
-# monosílabos que hoy no llevan tilde.
+# In 1909 standalone conjunctions and prepositions, and some one-syllable
+# words, carried an accent they no longer have.
 _SUELTAS = {"á": "a", "Á": "A", "é": "e", "É": "E", "ó": "o", "Ó": "O",
             "ú": "u", "Ú": "U"}
 _MONOSILABOS = {"fué": "fue", "Fué": "Fue", "fuí": "fui", "Fuí": "Fui",
@@ -41,7 +41,7 @@ def modernizar(texto):
         w = m.group(0)
         return _SUELTAS.get(w) or _MONOSILABOS.get(w) or w
     texto = _PALABRA.sub(cambio, texto)
-    # "EN el principio", "¡OH Jehová": la versalita de inicio de capítulo.
+    # "EN el principio", "¡OH Jehová": the small caps at the start of a chapter.
     return re.sub(r"^([¡¿\"(]?)([A-ZÁÉÍÓÚÑ])([A-ZÁÉÍÓÚÑ]+)\b",
                   lambda m: m.group(1) + m.group(2) + m.group(3).lower(),
                   texto, count=1)
@@ -51,14 +51,14 @@ _VERSALITA = re.compile(r"([¡¿]?)\b[A-ZÁÉÍÓÚÑ]{2,}\b")
 
 
 def limpiar(codigo, versiculo, texto):
-    """Lo que en la Biblia impresa no es parte del versículo leído."""
+    """Whatever in the printed Bible is not part of the verse as read aloud."""
     texto = re.sub(r"\s*\(Selah[.,]?\)", "", texto).strip()
-    # Los corchetes marcaban palabras que el traductor añadió; se leen igual.
+    # Brackets marked words the translator added; they are read all the same.
     texto = re.sub(r"\[([^\]]*)\]", r"\1", texto)
     if codigo == "PSA" and versiculo == "1":
-        # El título del salmo ("Salmo de David.", "ALEPH.") va pegado al
-        # versículo 1; el versículo empieza en la palabra en versalitas
-        # ("JEHOVÁ es..."). "Aleluya." sí es parte de lo que se lee.
+        # The psalm's title ("Salmo de David.", "ALEPH.") is glued to verse 1;
+        # the verse starts at the word in small caps ("JEHOVÁ es...").
+        # "Aleluya." IS part of what is read.
         m = next((m for m in _VERSALITA.finditer(texto)
                   if texto[m.end():m.end() + 1] != "."), None)
         if m and m.start() > 0:
@@ -78,7 +78,7 @@ class Biblia:
         self.libros = libros
 
     def buscar(self, cita):
-        """Recibe la cita ya formateada ("Juan capítulo 3, versículo 16")."""
+        """Takes the already formatted reference ("Juan capítulo 3, versículo 16")."""
         m = _CITA.match(cita)
         if not m:
             return None
@@ -93,8 +93,8 @@ class Biblia:
         return " ".join(versos)
 
     def versiculos(self, cita):
-        """Como buscar(), pero un (cita, texto) por versículo: en un Short un
-        rango se lee mejor de a uno por pantalla."""
+        """Like buscar(), but one (reference, text) per verse: in a Short a
+        range reads better one verse per screen."""
         m = _CITA.match(cita)
         if not m or not self.buscar(cita):
             return []
@@ -112,7 +112,7 @@ def cargar():
 
 def preparar():
     if not VPL.exists():
-        sys.exit(f"✗ Falta {VPL}. Bájalo de {FUENTE} y descomprímelo en biblia/.")
+        sys.exit(f"✗ Missing {VPL}. Download it from {FUENTE} and unzip it into biblia/.")
     nombre = dict(zip(CODIGOS, _NOMBRES))
     libros = {}
     for linea in VPL.read_text(encoding="utf-8").splitlines():
@@ -124,11 +124,11 @@ def preparar():
             limpiar(cod, ver, texto.strip())
     JSON.write_text(json.dumps(libros, ensure_ascii=False), encoding="utf-8")
     total = sum(len(v) for c in libros.values() for v in c.values())
-    print(f"✓ {JSON.relative_to(RAIZ)}: {len(libros)} libros, {total} versículos")
+    print(f"✓ {JSON.relative_to(RAIZ)}: {len(libros)} books, {total} verses")
 
 
 if __name__ == "__main__":
     if sys.argv[1:] == ["preparar"]:
         preparar()
     else:
-        sys.exit("uso: python3 scripts/biblia.py preparar")
+        sys.exit("usage: python3 scripts/biblia.py preparar")

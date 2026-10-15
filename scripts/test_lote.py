@@ -31,7 +31,7 @@ def test_nombre_por_defecto_sale_de_la_primera_cita():
 
 
 def test_linea_sin_barra_y_sin_biblia_es_un_error_claro():
-    with pytest.raises(ValueError, match="línea 2: falta el texto"):
+    with pytest.raises(ValueError, match="line 2: the text is missing"):
         leer_lote("clip: a.mp4\nSalmos 3:4 sin texto\n")
 
 
@@ -87,7 +87,7 @@ def test_cita_sola_toma_el_texto_de_la_biblia():
 
 
 def test_cita_sola_que_no_existe_es_un_error_claro():
-    with pytest.raises(ValueError, match="línea 1: no encontré Juan capítulo 3, versículo 99"):
+    with pytest.raises(ValueError, match="line 1: Juan capítulo 3, versículo 99 was not found"):
         leer_lote("Juan 3:99\n", biblia=BibliaFalsa())
 
 
@@ -112,7 +112,7 @@ def test_ficha_para_subir_lleva_titulo_versiculos_atribucion_y_hashtags():
         ("Juan capítulo 3, versículo 17", "Porque no envió Dios.")]}
     f = ficha(short, atribucion="Música: Pista X de Autor Y (CC BY)")
     titulo = f.splitlines()[0]
-    assert titulo.startswith("TÍTULO: ") and "Juan 3:16" in titulo and len(titulo) <= 108
+    assert titulo.startswith("TITLE: ") and "Juan 3:16" in titulo and len(titulo) <= 108
     assert "Porque de tal manera amó Dios al mundo.\n— Juan capítulo 3, versículo 16" in f
     assert "Música: Pista X de Autor Y (CC BY)" in f
     assert "Reina-Valera 1909" in f and "#shorts" in f
@@ -136,7 +136,7 @@ def test_nombre_propio_se_limpia():
 
 
 def test_bloque_sin_versiculos_avisa():
-    with pytest.raises(ValueError, match="sin versículos"):
+    with pytest.raises(ValueError, match="has no verses"):
         leer_lote("clip: a.mp4\n---\nJuan 3:16 | x\n")
 
 

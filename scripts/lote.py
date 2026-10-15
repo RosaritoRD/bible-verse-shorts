@@ -1,16 +1,17 @@
-"""Partes puras del pipeline (sin ffmpeg): leer el lote, repartir tiempos y
-escribir los subtítulos ASS que ffmpeg quema en el video."""
+"""Pure parts of the pipeline (no ffmpeg): read the batch, split the timing and
+write the ASS subtitles ffmpeg burns into the video. On-screen text and the
+upload sheet's content are Spanish on purpose: that is the product."""
 import re
 
 from referencias import formatear
 
 ANCHO, ALTO = 1080, 1920
-# Altura (px desde arriba) donde empieza la cita. Por debajo de ~1440 la tapan
-# el título y los botones de YouTube.
+# Height (px from the top) where the reference starts. Below ~1440 YouTube's
+# title and buttons cover it.
 Y_CITA = 1180
 
-# Segundos que se queda cada versículo en pantalla: lo que tarda alguien en
-# leerlo con calma (~2,4 palabras/s) más un respiro, nunca menos de 4 s.
+# Seconds each verse stays on screen: the time it takes to read it calmly
+# (~2.4 words/s) plus a breath, never less than 4 s.
 MINIMO_S = 4.0
 BASE_S = 1.5
 POR_PALABRA_S = 0.42
@@ -25,8 +26,8 @@ def _slug(s):
 
 
 def leer_lote(texto, biblia=None):
-    """Un short por bloque; los bloques se separan con una línea '---'.
-    Una línea con solo la cita toma el texto de `biblia` (ver biblia.py)."""
+    """One Short per block; blocks are separated by a '---' line.
+    A line with only the reference takes its text from `biblia` (see biblia.py)."""
     shorts, actual = [], None
 
     def nuevo():
@@ -38,8 +39,8 @@ def leer_lote(texto, biblia=None):
             continue
         if linea == "---":
             if actual and not actual["versiculos"]:
-                raise ValueError(f"línea {n}: el bloque de arriba está sin "
-                                 f"versículos (¿falta la cita?)")
+                raise ValueError(f"line {n}: the block above has no "
+                                 f"verses (missing reference?)")
             if actual:
                 shorts.append(actual)
             actual = None
@@ -57,18 +58,18 @@ def leer_lote(texto, biblia=None):
             continue
         cita = formatear(linea)
         if biblia is None:
-            raise ValueError(f"línea {n}: falta el texto. Formato: "
-                             f"'Salmos 3:4 | texto' (o prepara la Biblia: "
+            raise ValueError(f"line {n}: the text is missing. Format: "
+                             f"'Salmos 3:4 | text' (or prepare the Bible: "
                              f"python3 scripts/biblia.py preparar)")
         uno_a_uno = biblia.versiculos(cita)
         if not uno_a_uno:
-            raise ValueError(f"línea {n}: no encontré {cita} en la Biblia. "
-                             f"Revisa la cita o pon el texto: 'cita | texto'")
-        if not actual["versiculos"]:  # el nombre sale de la cita entera
+            raise ValueError(f"line {n}: {cita} was not found in the Bible. "
+                             f"Check the reference or add the text: 'reference | text'")
+        if not actual["versiculos"]:  # the name comes from the full reference
             actual["cita_lote"] = cita
         actual["versiculos"].extend(uno_a_uno)
     if actual and not actual["versiculos"]:
-        raise ValueError("el último bloque está sin versículos (¿falta la cita?)")
+        raise ValueError("the last block has no verses (missing reference?)")
     if actual:
         shorts.append(actual)
     vistos = {}
@@ -100,13 +101,13 @@ def _hms(seg):
 
 
 def _limpio(t):
-    # Las llaves abren comandos en ASS; un salto de línea real rompe la fila.
+    # Braces open commands in ASS; a real line break breaks the row.
     return t.replace("{", "(").replace("}", ")").replace("\n", " ")
 
 
 def _tamano(verso):
-    """Letra más chica para los versículos largos, para que no se salgan por
-    arriba (a 76 px caben ~11 líneas sobre la cita)."""
+    """Smaller font for long verses so they don't run off the top
+    (at 76 px about 11 lines fit above the reference)."""
     palabras = len(verso.split())
     if palabras > 60:
         return "\\fs50"
@@ -116,8 +117,8 @@ def _tamano(verso):
 
 
 def _partir_cita(cita, largo=26):
-    """Una cita larga se parte en la coma ("Proverbios capítulo 3," /
-    "versículos 5 al 6") en vez de donde caiga."""
+    """A long reference is split at the comma ("Proverbios capítulo 3," /
+    "versículos 5 al 6") instead of wherever it happens to wrap."""
     if len(cita) > largo and ", " in cita:
         libro_cap, resto = cita.split(", ", 1)
         return f"{libro_cap},\\N{resto}"
@@ -141,14 +142,13 @@ def _cabecera(estilos):
 
 def ass_versiculos(versiculos, tiempos, fuente="DejaVu Serif"):
     estilos = [
-        # Versículo: blanco con borde negro para leerse sobre cualquier fondo.
-        # Va anclado por ABAJO justo encima de la cita: si es largo crece hacia
-        # arriba y nunca se monta sobre ella.
+        # Verse: white with a black outline so it reads on any background.
+        # It's anchored at the BOTTOM just above the reference: a long verse
+        # grows upward and never overlaps it.
         f"Style: Versiculo,{fuente},76,&H00FFFFFF,&H00FFFFFF,&H00000000,"
         f"&H64000000,-1,0,0,0,100,100,0,0,1,5,2,2,110,110,{ALTO - Y_CITA + 40},1\n",
-        # Cita (Salmos 3, versículo 4): dorada, debajo del texto.
-        # Cita (Salmos capítulo 3, versículo 4): dorada sobre una franja
-        # oscura semitransparente, para que se lea aunque el fondo sea dorado.
+        # Reference (Salmos capítulo 3, versículo 4): gold, below the text, on
+        # a dark translucent band so it reads even over a golden background.
         f"Style: Cita,{fuente},52,&H0037AFD4,&H0037AFD4,&H70000000,"
         f"&H70000000,-1,0,0,0,100,100,0,0,3,14,0,8,110,110,{Y_CITA},1\n",
     ]
@@ -163,8 +163,8 @@ def ass_versiculos(versiculos, tiempos, fuente="DejaVu Serif"):
 
 
 def agrupar_palabras(palabras, maximo=3, pausa=0.6):
-    """[(ini, fin, palabra)] -> bloques de hasta `maximo` palabras; una pausa
-    larga también corta el bloque para que el texto no se adelante a la voz."""
+    """[(start, end, word)] -> blocks of up to `maximo` words; a long pause
+    also ends the block so the text never runs ahead of the voice."""
     grupos, actual = [], []
     for p in palabras:
         if actual and (len(actual) >= maximo or p[0] - actual[-1][1] > pausa):
@@ -179,8 +179,8 @@ def agrupar_palabras(palabras, maximo=3, pausa=0.6):
 
 
 def ass_clipping(grupos, citas, fuente="DejaVu Sans"):
-    """Subtítulos de lo que se dice + cartel con la cita cuando la nombran.
-    citas = [(ini, fin, 'Juan 3, versículo 16')]"""
+    """Subtitles of what is said + a title card with the reference when it's named.
+    citas = [(start, end, 'Juan 3, versículo 16')]"""
     estilos = [
         f"Style: Habla,{fuente},84,&H00FFFFFF,&H00FFFFFF,&H00000000,"
         "&H64000000,-1,0,0,0,100,100,0,0,1,6,2,2,80,80,560,1\n",
@@ -195,7 +195,7 @@ def ass_clipping(grupos, citas, fuente="DejaVu Sans"):
 
 
 def _cita_corta(cita):
-    """"Juan capítulo 3, versículos 16 al 17" -> "Juan 3:16-17" (para títulos)."""
+    """"Juan capítulo 3, versículos 16 al 17" -> "Juan 3:16-17" (for titles)."""
     m = re.match(r"^(.+) capítulo (\d+)(?:, versículos? (\d+)(?: al (\d+))?)?$", cita)
     if not m:
         return cita
@@ -204,18 +204,18 @@ def _cita_corta(cita):
 
 
 def ficha(short, atribucion=None, version="Reina-Valera 1909"):
-    """Texto listo para copiar al subir el Short."""
+    """Text ready to copy when uploading the Short (the content stays Spanish)."""
     vs = short["versiculos"]
     primero = _cita_corta(vs[0][0])
     gancho = vs[0][1].split(".")[0].split(";")[0].split(":")[0].strip()
     titulo = f"{gancho} | {primero}"
-    if len(titulo) > 100:  # tope de YouTube para el título
+    if len(titulo) > 100:  # YouTube's title limit
         titulo = f"{gancho[:100 - len(primero) - 4].rstrip()}… | {primero}"
     cuerpo = "\n\n".join(f"{texto}\n— {cita}" for cita, texto in vs)
     libros = {re.sub(r"\s+", "", c.split(" capítulo")[0]).lower() for c, _ in vs}
     tags = " ".join(["#shorts", "#biblia", "#versiculodeldia", "#dios"]
                     + [f"#{_slug(l).replace('-', '')}" for l in sorted(libros)])
-    partes = [f"TÍTULO: {titulo}", "", "DESCRIPCIÓN:", cuerpo]
+    partes = [f"TITLE: {titulo}", "", "DESCRIPTION:", cuerpo]
     if not short.get("texto_propio"):
         partes += ["", f"Texto bíblico: {version} (dominio público)."]
     if atribucion:

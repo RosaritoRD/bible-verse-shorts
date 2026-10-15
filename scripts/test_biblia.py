@@ -19,7 +19,7 @@ def test_modernizar_quita_acentos_de_1909():
 def test_modernizar_baja_la_mayuscula_de_inicio_de_capitulo():
     assert modernizar("EN el principio crió Dios") == "En el principio crió Dios"
     assert modernizar("¡OH Jehová, cuánto") == "¡Oh Jehová, cuánto"
-    assert modernizar("Y JEHOVÁ dijo") == "Y JEHOVÁ dijo"  # solo al inicio
+    assert modernizar("Y JEHOVÁ dijo") == "Y JEHOVÁ dijo"  # only at the start
 
 
 def test_buscar_un_versiculo_y_un_rango():
@@ -37,7 +37,7 @@ def test_salmo_en_singular_busca_en_salmos():
 def test_cita_que_no_existe_devuelve_none():
     b = Biblia(TEXTO)
     assert b.buscar("Juan capítulo 3, versículo 99") is None
-    assert b.buscar("Juan capítulo 3") is None  # capítulo entero: demasiado largo
+    assert b.buscar("Juan capítulo 3") is None  # whole chapter: too long
     assert b.buscar("Mi frase") is None
 
 
@@ -48,7 +48,7 @@ def test_limpiar_quita_titulo_de_salmo_y_selah():
     assert limpiar("PSA", "1", "Salmo de David, cuando huía de Absalom. ¡OH Jehová, cuánto") == \
         "¡Oh Jehová, cuánto"
     assert limpiar("PSA", "4", "y él me respondió. (Selah.)") == "y él me respondió."
-    # Fuera del versículo 1 de un salmo no se recorta nada.
+    # Outside a psalm's verse 1 nothing is trimmed.
     assert limpiar("JOH", "1", "EN el principio era el Verbo") == "En el principio era el Verbo"
 
 
@@ -56,7 +56,7 @@ def test_limpiar_letra_hebrea_aleluya_y_corchetes():
     from biblia import limpiar
     assert limpiar("PSA", "1", "ALEPH. BIENAVENTURADOS los perfectos") == \
         "Bienaventurados los perfectos"
-    # "Aleluya" sí se lee como parte del versículo.
+    # "Aleluya" IS read as part of the verse.
     assert limpiar("PSA", "1", "Aleluya. ALABAD á Dios") == "Aleluya. Alabad a Dios"
     assert limpiar("PSA", "5", "respondióme JAH, [poniéndome] en anchura") == \
         "respondióme JAH, poniéndome en anchura"

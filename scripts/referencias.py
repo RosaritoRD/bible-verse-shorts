@@ -1,10 +1,11 @@
-"""Referencias bíblicas: "Salmos 3:4" -> "Salmos capítulo 3, versículo 4".
+"""Bible references: "Salmos 3:4" -> "Salmos capítulo 3, versículo 4".
 
-formatear() da forma a una referencia escrita a mano en el lote.
-detectar() busca citas dentro de lo que se dice en un clip (transcripción).
+formatear() shapes a reference typed by hand in the batch file.
+detectar() finds references inside what is said in a clip (transcript).
 
-Con números ("Juan 3:5") el primero es el capítulo, como en cualquier Biblia.
-Con palabras ("Juan versículo 3 capítulo 5") manda lo que dice cada palabra.
+With numbers ("Juan 3:5") the first one is the chapter, as in any Bible.
+With words ("Juan versículo 3 capítulo 5") each word says what it is.
+The output is Spanish on purpose: it is the text shown and read on screen.
 """
 import re
 import unicodedata
@@ -26,18 +27,18 @@ LIBROS = [
 
 
 def _sin_tildes(s):
-    # Quitar tildes en NFD no cambia la cantidad de letras base, así que las
-    # posiciones del texto plano sirven para recortar el original.
+    # Stripping accents in NFD doesn't change the number of base letters, so
+    # positions in the plain text can be used to slice the original.
     return "".join(c for c in unicodedata.normalize("NFD", s)
                    if unicodedata.category(c) != "Mn").lower()
 
 
 _POR_CLAVE = {_sin_tildes(l): l for l in LIBROS}
-# Los más largos primero: "1 Juan" antes que "Juan".
+# Longest first: "1 Juan" before "Juan".
 _ALT_LIBROS = "|".join(re.escape(_sin_tildes(l))
                        for l in sorted(LIBROS, key=len, reverse=True))
 
-_V = r"(\d+)(?:\s*(?:-|al|a)\s*(\d+))?"  # versículo o rango "1 al 3"
+_V = r"(\d+)(?:\s*(?:-|al|a)\s*(\d+))?"  # verse or range "1 al 3"
 _CAP_VER = r"\s*,?\s+capitulo\s+(\d+)\s*,?\s*(?:y\s+)?(?:el\s+)?versiculos?\s+" + _V
 _VER_CAP = r"\s*,?\s+(?:el\s+)?versiculos?\s+" + _V + r"\s*,?\s*(?:del?\s+)?capitulo\s+(\d+)"
 _NUM = r"\s+(?:capitulo\s+)?(\d+)(?:\s*[:,.]\s*|\s+)" + _V
@@ -45,7 +46,7 @@ _SOLO_CAP = r"\s+(?:capitulo\s+)?(\d+)"
 
 
 def _formas(libro, solo_capitulo):
-    """[(patrón, grupos -> (cap, v1, v2))]; el grupo 0 siempre es el libro."""
+    """[(pattern, groups -> (chapter, v1, v2))]; group 0 is always the book."""
     formas = [
         (re.compile(libro + _CAP_VER), lambda g: (g[1], g[2], g[3])),
         (re.compile(libro + _VER_CAP), lambda g: (g[3], g[1], g[2])),
@@ -57,8 +58,8 @@ def _formas(libro, solo_capitulo):
 
 
 _FORMAS_ESCRITAS = _formas(r"\s*(.+?)", solo_capitulo=True)
-# En lo hablado solo cuentan libros conocidos y con versículo: "Juan 3" suelto
-# es demasiado ambiguo ("en Juan 3 años...").
+# In speech only known books with a verse count: a bare "Juan 3" is too
+# ambiguous ("en Juan 3 años...").
 _FORMAS_HABLADAS = _formas(r"(?<![\w])(" + _ALT_LIBROS + r")", solo_capitulo=False)
 
 
@@ -66,7 +67,7 @@ def _componer(libro, cap, v1=None, v2=None):
     base = f"{libro} capítulo {int(cap)}"
     if not v1:
         return base
-    if v2 and int(v2) > int(v1):  # "Juan 3:16 a 5 personas" no es un rango
+    if v2 and int(v2) > int(v1):  # "Juan 3:16 a 5 personas" is not a range
         return f"{base}, versículos {int(v1)} al {int(v2)}"
     return f"{base}, versículo {int(v1)}"
 
@@ -94,7 +95,7 @@ def detectar(texto):
                                                             *partes(m.groups()))))
     citas, hasta = [], -1
     for ini, fin, cita in sorted(hallazgos):
-        if ini >= hasta:  # dos formas que leen la misma cita: vale la primera
+        if ini >= hasta:  # two patterns reading the same reference: the first one wins
             citas.append(cita)
             hasta = fin
     return citas

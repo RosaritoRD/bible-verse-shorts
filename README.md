@@ -65,7 +65,7 @@ Then:
 3. Write your references in `entrada/lote.txt`, separated by `---`.
 4. Run `./versiculos.sh`, and your Shorts show up in `salida/`.
 
-Full step-by-step guide (in Spanish): **[COMO-USAR.md](COMO-USAR.md)**.
+Full step-by-step guide: **[HOW-TO-USE.md](HOW-TO-USE.md)**.
 
 ## ⚠️ Rights
 - Only use backgrounds with a commercial license (Pexels, Pixabay) and music from the YouTube Audio Library.

@@ -1,17 +1,17 @@
-# Entorno y cachés
+# Environment and caches
 .venv/
 .pytest_cache/
 __pycache__/
 
-# Lo que se genera (se rehace con los scripts)
+# Generated output (the scripts rebuild it)
 salida/**
 !salida/clipping/
 notas/ejemplos/
 notas/prueba/frames/
-# biblia/rv1909.json se rehace con: python3 scripts/biblia.py preparar
+# biblia/rv1909.json is rebuilt with: python3 scripts/biblia.py preparar
 biblia/rv1909.json
 
-# Tu material: pesado y con licencias propias
+# Your material: heavy, and with its own licenses
 entrada/fondos/*
 entrada/musica/*
 entrada/clipping/*
