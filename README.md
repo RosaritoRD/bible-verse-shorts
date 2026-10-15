@@ -8,7 +8,7 @@ It also includes a **clipping** mode: turns long sermons into subtitled vertical
 
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-3776AB.svg)](requirements.txt)
-[![Tests](https://img.shields.io/badge/tests-42%20passing-2ea44f.svg)](scripts)
+[![Tests](https://img.shields.io/badge/tests-51%20passing-2ea44f.svg)](scripts)
 [![Docs](https://img.shields.io/badge/docs-KEIZAC%20TECH-black.svg)](https://keizactech.com/docs)
 
 </div>

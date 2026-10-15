@@ -26,12 +26,32 @@ MAXIMO_S = 180
 
 
 def segundos(t):
+    """'1:20' -> 80.0, '1:00:05' -> 3605.0. None si no se dio."""
     if t is None:
         return None
     s = 0.0
-    for parte in str(t).split(":"):
-        s = s * 60 + float(parte)
+    try:
+        for parte in str(t).split(":"):
+            s = s * 60 + float(parte)
+    except ValueError:
+        raise ValueError(f"no entiendo el tiempo {t!r}: usa 1:20 o 1:00:05") from None
     return s
+
+
+def calcular_tramo(desde_txt, hasta_txt, dur):
+    """El tramo (desde, hasta) en segundos, ya comprobado contra la duración.
+
+    Un error aquí sale como mensaje claro antes de gastar tiempo en Whisper,
+    en vez de un -t negativo que ffmpeg rechaza con un error críptico."""
+    desde = segundos(desde_txt) or 0.0
+    hasta = segundos(hasta_txt)
+    if desde >= dur:
+        raise ValueError(f"empieza en {desde:.0f} s pero el video dura {dur:.0f} s")
+    if hasta is None or hasta > dur:
+        hasta = dur
+    if hasta <= desde:
+        raise ValueError(f"--hasta ({hasta:.0f} s) tiene que ir después de --desde ({desde:.0f} s)")
+    return desde, min(hasta, desde + MAXIMO_S)
 
 
 def duracion(video):
@@ -115,6 +135,9 @@ def main():
         except SinImagen:
             print(f"      ✗ {video.name}: no tiene imagen (¿es solo audio?)")
             fallos.append(video.name)
+        except ValueError as e:  # tramo mal pedido: este video falla, el lote sigue
+            print(f"      ✗ {video.name}: {e}")
+            fallos.append(video.name)
         except subprocess.CalledProcessError as e:
             err = e.stderr or b""
             err = (err.decode(errors="replace") if isinstance(err, bytes)
@@ -142,12 +165,12 @@ def procesar(i, n, video, args, modelo):
     if not tiene_imagen(video):
         raise SinImagen()
     nombre = video.stem
-    desde = segundos(args.desde) or 0.0
-    hasta = segundos(args.hasta) or duracion(video)
-    if hasta - desde > MAXIMO_S:
-        print(f"[{i}/{n}] {nombre}: ⚠ dura {hasta - desde:.0f} s; "
+    dur = duracion(video)
+    desde, hasta = calcular_tramo(args.desde, args.hasta, dur)
+    pedido = (segundos(args.hasta) or dur) - desde
+    if pedido > MAXIMO_S and hasta - desde == MAXIMO_S:
+        print(f"[{i}/{n}] {nombre}: ⚠ dura {pedido:.0f} s; "
               f"se corta a {MAXIMO_S} s (tope de un Short).")
-        hasta = desde + MAXIMO_S
     print(f"[{i}/{n}] {nombre}: transcribiendo…")
     with tempfile.TemporaryDirectory() as tmp:
         tramo = Path(tmp) / "tramo.mp4"
