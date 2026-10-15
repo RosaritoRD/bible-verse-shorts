@@ -1,0 +1,18 @@
+# Entorno y cachés
+.venv/
+.pytest_cache/
+__pycache__/
+
+# Lo que se genera (se rehace con los scripts)
+salida/**
+!salida/clipping/
+notas/ejemplos/
+notas/prueba/frames/
+# biblia/rv1909.json se rehace con: python3 scripts/biblia.py preparar
+biblia/rv1909.json
+
+# Tu material: pesado y con licencias propias
+entrada/fondos/*
+entrada/musica/*
+entrada/clipping/*
+!entrada/*/.gitkeep
