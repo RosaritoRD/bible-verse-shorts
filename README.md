@@ -1,87 +1,90 @@
 <div align="center">
 
-# 📖 Shorts de versículos
+# 📖 Bible Verse Shorts
 
-**Fábrica en serie de YouTube Shorts cristianos: escribes la cita y sale el vídeo vertical con el versículo, fondo, música, subtítulos y la ficha para subirlo.**
+**A batch factory for Christian YouTube Shorts in Spanish: type the Bible reference and out comes a vertical video with the verse, background, music, subtitles and an upload sheet.**
 
-Incluye además un modo **clipping**: convierte prédicas largas en clips verticales subtitulados para campañas que pagan por vistas.
+It also includes a **clipping** mode: turns long sermons into subtitled vertical clips for campaigns that pay per view.
 
-[![MIT License](https://img.shields.io/badge/licencia-MIT-blue.svg)](LICENSE)
+[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-3776AB.svg)](requirements.txt)
-[![Tests](https://img.shields.io/badge/tests-42%20ok-2ea44f.svg)](scripts)
+[![Tests](https://img.shields.io/badge/tests-42%20passing-2ea44f.svg)](scripts)
 [![Docs](https://img.shields.io/badge/docs-KEIZAC%20TECH-black.svg)](https://keizactech.com/docs)
 
 </div>
 
 ---
 
-## ✨ Qué hace
+## ✨ What it does
 
-**A. Shorts de versículos**
-- Escribes `Salmos 23:1-3` y el texto sale solo de la **Reina-Valera 1909** (dominio público).
-- En pantalla se lee *"Salmos capítulo 23, versículo 1"*, con un versículo por pantalla.
-- Fondo de paisaje y música elegidos al azar de tus carpetas, recortados a **1080×1920**.
-- Por cada Short genera un `.txt` con **título, descripción, hashtags y la atribución de la música**, listo para copiar.
+**A. Verse Shorts**
+- You type `Salmos 23:1-3` and the text comes straight from the **Reina-Valera 1909** Spanish Bible (public domain).
+- On screen it reads *"Salmos capítulo 23, versículo 1"*, one verse per screen.
+- A landscape background and music picked at random from your folders, cropped to **1080×1920**.
+- For every Short it writes a `.txt` with the **title, description, hashtags and music attribution**, ready to copy.
 
 **B. Clipping**
-- Le das una prédica larga. Transcribe con **faster-whisper** en la CPU, sin pagar ninguna API.
-- Corta clips verticales con subtítulos y, si detecta una cita bíblica hablada, pone un **cartel con la cita**.
+- Give it a long sermon. It transcribes with **faster-whisper** on the CPU, without paying for any API.
+- It cuts subtitled vertical clips and, when it detects a spoken Bible reference, adds a **title card with the reference**.
 
-## 🧠 Cómo funciona
+## 🧠 How it works
 
 ```mermaid
 flowchart LR
-    L[entrada/lote.txt<br/>Salmos 23:1-3] --> R[referencias.py<br/>cita → texto hablado]
-    R --> B[biblia.py<br/>RV1909 local]
-    B --> T[lote.py<br/>tiempos + subtítulos ASS + ficha]
+    L[entrada/lote.txt<br/>Salmos 23:1-3] --> R[referencias.py<br/>reference → spoken text]
+    R --> B[biblia.py<br/>local RV1909]
+    B --> T[lote.py<br/>timing + ASS subtitles + sheet]
     F[entrada/fondos] --> V[hacer_versiculos.py<br/>FFmpeg + libass]
     M[entrada/musica] --> V
     T --> V --> S[salida/*.mp4 + *.txt]
 ```
 
-| Archivo | Qué hace |
+| File | What it does |
 |---|---|
-| `scripts/referencias.py` | Entiende "Salmos 3:4", "Juan 3 16" o "Juan capítulo 3 versículo 5" |
-| `scripts/biblia.py` | Prepara la RV1909 de eBible.org: modernización mínima, sin títulos ni "Selah" |
-| `scripts/lote.py` | Calcula tiempos (~2,4 palabras/s), genera los subtítulos y la ficha. Es puro y tiene tests |
-| `scripts/hacer_versiculos.py` | Monta el Short con FFmpeg |
-| `scripts/hacer_clipping.py` | Transcribe y corta los clips |
+| `scripts/referencias.py` | Understands "Salmos 3:4", "Juan 3 16" or "Juan capítulo 3 versículo 5" |
+| `scripts/biblia.py` | Prepares the RV1909 from eBible.org: minimal modernization, no headings or "Selah" |
+| `scripts/lote.py` | Computes timing (~2.4 words/s), builds the subtitles and the sheet. Pure and tested |
+| `scripts/hacer_versiculos.py` | Assembles the Short with FFmpeg |
+| `scripts/hacer_clipping.py` | Transcribes and cuts the clips |
 
-## 🚀 Arranque rápido
+## 🚀 Quick start
 
-**Necesitas:** Python 3.10+, FFmpeg con libass.
+**You need:** Python 3.10+ and FFmpeg with libass.
 
 ```bash
 git clone https://github.com/RosaritoRD/shorts-versiculos.git
 cd shorts-versiculos
 python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
-python3 scripts/biblia.py preparar      # crea biblia/rv1909.json
-./probar.sh                             # prueba completa con material sintético
+python3 scripts/biblia.py preparar      # creates biblia/rv1909.json
+./probar.sh                             # full test run with synthetic material
 ```
 
-Luego:
-1. Fondos (vídeos de Pexels o Pixabay) en `entrada/fondos/`.
-2. Música de la Biblioteca de audio de YouTube en `entrada/musica/`. Si la pista pide atribución, pon un `.txt` con el mismo nombre.
-3. Escribe tus citas en `entrada/lote.txt`, separadas por `---`.
-4. `./versiculos.sh`, y tus Shorts aparecen en `salida/`.
+Then:
+1. Backgrounds (videos from Pexels or Pixabay) go in `entrada/fondos/`.
+2. Music from the YouTube Audio Library goes in `entrada/musica/`. If a track requires attribution, add a `.txt` with the same name.
+3. Write your references in `entrada/lote.txt`, separated by `---`.
+4. Run `./versiculos.sh`, and your Shorts show up in `salida/`.
 
-Guía completa paso a paso: **[COMO-USAR.md](COMO-USAR.md)**.
+Full step-by-step guide (in Spanish): **[COMO-USAR.md](COMO-USAR.md)**.
 
-## ⚠️ Derechos
-- Usa solo fondos con licencia comercial (Pexels, Pixabay) y música de la Biblioteca de audio de YouTube.
-- En **clipping**, corta solo prédicas de campañas que te autoricen a hacerlo.
-- En **Job 39–41** la RV1909 numera distinto que las Biblias modernas: pon el texto a mano con `Cita | texto`.
+## ⚠️ Rights
+- Only use backgrounds with a commercial license (Pexels, Pixabay) and music from the YouTube Audio Library.
+- In **clipping** mode, only cut sermons from campaigns that authorize you to do so.
+- In **Job 39–41** the RV1909 numbers verses differently from modern Bibles: enter the text by hand with `Reference | text`.
 
-## 🤖 Con Claude Code o Codex
-El repo trae `CLAUDE.md` con todo el contexto. Abre la carpeta con `claude` o `codex` y pídele, por ejemplo: *"Añade otra traducción de la Biblia"* o *"Haz que el título lleve el tema del versículo"*.
+## 🤖 With Claude Code or Codex
+The repo ships a `CLAUDE.md` with all the context. Open the folder with `claude` or `codex` and ask, for example: *"Add another Bible translation"* or *"Put the verse's theme in the title."*
 
-## 💸 Ahorro y mejoras
-Ver **[AHORRO-Y-MEJORAS.md](AHORRO-Y-MEJORAS.md)**.
+## 💸 Savings and tips
+See **[SAVINGS-AND-TIPS.md](SAVINGS-AND-TIPS.md)**.
 
-## 📚 Más
-- Para producir oraciones completas (largos + Shorts) con IA: **[Oraflow](https://github.com/RosaritoRD/oraflow)**
-- Para la voz local gratis: **[voz-local](https://github.com/RosaritoRD/voz-local)**
-- 📖 Guías: **[keizactech.com/docs](https://keizactech.com/docs)**
+## 🤝 Contributing
+Issues and PRs are welcome — look for the [`good first issue`](https://github.com/RosaritoRD/shorts-versiculos/labels/good%20first%20issue) label and read [CONTRIBUTING.md](CONTRIBUTING.md).
 
-## 📄 Licencia
-Código: MIT. Texto bíblico: Reina-Valera 1909, dominio público (eBible.org).
+## 📚 More
+- To produce full prayers (long videos + Shorts) with AI: **[Oraflow](https://github.com/RosaritoRD/oraflow)**
+- For free local voice: **[voz-local](https://github.com/RosaritoRD/voz-local)**
+- 📖 Guides: **[keizactech.com/docs](https://keizactech.com/docs)**
+
+## 📄 License
+Code: MIT. Bible text: Reina-Valera 1909, public domain (eBible.org).
