@@ -14,4 +14,4 @@
 2. **One verse per screen.** Long ranges are tiring; 1–3 verses per Short is better.
 3. **Don't leave test material in `entrada/`.** The random background and music picker would use it in real Shorts.
 4. **Vary the music.** With 10–20 different tracks, your Shorts don't all sound the same.
-5. **Ideas to extend it:** automatic upload to YouTube, a voice reading the verse with [voz-local](https://github.com/RosaritoRD/voz-local), or thumbnails with the verse.
+5. **Ideas to extend it:** automatic upload to YouTube, a voice reading the verse with [voz-local](https://github.com/RosaritoRD/local-voice), or thumbnails with the verse.

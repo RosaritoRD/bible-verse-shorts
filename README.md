@@ -52,7 +52,7 @@ flowchart LR
 **You need:** Python 3.10+ and FFmpeg with libass.
 
 ```bash
-git clone https://github.com/RosaritoRD/shorts-versiculos.git
+git clone https://github.com/RosaritoRD/bible-verse-shorts.git
 cd shorts-versiculos
 python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
 python3 scripts/biblia.py preparar      # creates biblia/rv1909.json
@@ -79,11 +79,11 @@ The repo ships a `CLAUDE.md` with all the context. Open the folder with `claude`
 See **[SAVINGS-AND-TIPS.md](SAVINGS-AND-TIPS.md)**.
 
 ## 🤝 Contributing
-Issues and PRs are welcome — look for the [`good first issue`](https://github.com/RosaritoRD/shorts-versiculos/labels/good%20first%20issue) label and read [CONTRIBUTING.md](CONTRIBUTING.md).
+Issues and PRs are welcome — look for the [`good first issue`](https://github.com/RosaritoRD/bible-verse-shorts/labels/good%20first%20issue) label and read [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## 📚 More
 - To produce full prayers (long videos + Shorts) with AI: **[Oraflow](https://github.com/RosaritoRD/oraflow)**
-- For free local voice: **[voz-local](https://github.com/RosaritoRD/voz-local)**
+- For free local voice: **[voz-local](https://github.com/RosaritoRD/local-voice)**
 - 📖 Guides: **[keizactech.com/docs](https://keizactech.com/docs)**
 
 ## 📄 License
